@@ -33,5 +33,63 @@ namespace Producks.Web.Controllers
                                        .ToListAsync();
             return Ok(brands);
         }
+
+        // GET: api/Categories
+        [HttpGet("api/Categories")]
+        public async Task<IActionResult> GetCategories()
+        {
+            var categories = await _context.Categories.Select(c => new CategoryDto
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Description = c.Description,
+                Active = c.Active
+            }).ToListAsync();
+
+            return Ok(categories);
+        }
+
+        // GET: api/Products
+        [HttpGet("api/Products")]
+        public async Task<IActionResult> GetProducts(int CategoryId, int BrandId, int? LowPrice, int? TopPrice)
+        {
+            object products = null;
+            if(LowPrice == null || TopPrice == null)
+            {
+                products = await _context.Products.Select(p => new ProductDto
+                {
+                    Id = p.Id,
+                    CategoryId = p.CategoryId,
+                    BrandId = p.BrandId,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Price = p.Price,
+                    StockLevel = p.StockLevel,
+                    Active = p.Active
+                }).Where(c => c.CategoryId == CategoryId)
+                .Where(b => b.BrandId == BrandId)
+                .ToListAsync();
+            }
+            else
+            {
+                products = await _context.Products.Select(p => new ProductDto
+                {
+                    Id = p.Id,
+                    CategoryId = p.CategoryId,
+                    BrandId = p.BrandId,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Price = p.Price,
+                    StockLevel = p.StockLevel,
+                    Active = p.Active
+                }).Where(c => c.CategoryId == CategoryId)
+                .Where(b => b.BrandId == BrandId)
+                .Where(lp => lp.Price >= LowPrice)
+                .Where(tp => tp.Price <= TopPrice)
+                .ToListAsync();
+            }
+
+            return Ok(products);
+        }
     }
 }
